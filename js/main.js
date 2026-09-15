@@ -715,9 +715,20 @@ function navSpy() {
 /* ---------- start ---------- */
 /* ---------- always start at the top on load/refresh ---------- */
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+const goTop = () => window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 if (location.hash) history.replaceState(null, "", location.pathname + location.search);
-window.scrollTo(0, 0);
-window.addEventListener("load", () => window.scrollTo(0, 0));
+goTop();
+window.addEventListener("load", () => { goTop(); setTimeout(goTop, 50); });
+
+// in-page links scroll without adding #section to the URL
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  const target = a.getAttribute("href") === "#top" ? document.body : document.querySelector(a.getAttribute("href"));
+  if (!target) return;
+  e.preventDefault();
+  target.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+});
 staticContent();
 fireflies();
 glyphSphere();
@@ -726,5 +737,5 @@ explorer();
 skillNet();
 terminal();
 navSpy();
-boot().then(typed);
+boot().then(() => { goTop(); typed(); });
 })();
